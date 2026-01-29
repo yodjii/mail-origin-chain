@@ -22,6 +22,7 @@ export interface Diagnostics {
 
 export interface HistoryEntry {
     from: EmailAddress | null;
+    to: EmailAddress | null;
     subject: string | null;
     date_raw: string | null;
     date_iso: string | null;
@@ -33,6 +34,7 @@ export interface HistoryEntry {
 
 export interface ResultObject {
     from: EmailAddress | null;
+    to: EmailAddress | null;
     subject: string | null;
     date_raw: string | null;
     date_iso: string | null;

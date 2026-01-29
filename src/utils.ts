@@ -222,12 +222,26 @@ export function normalizeParserResult(
     // Normalize From
     let from: EmailAddress | null = null;
     if (email.from && typeof email.from === 'object') {
-        // Only set from if we have at least an address
         if (email.from.address) {
             from = { name: email.from.name, address: email.from.address };
         }
     } else if (typeof email.from === 'string' && email.from.trim()) {
         from = { address: email.from.trim() };
+    }
+
+    // Normalize To
+    let to_addr: EmailAddress | null = null;
+    if (email.to && typeof email.to === 'object') {
+        if (Array.isArray(email.to)) {
+            if (email.to.length > 0) {
+                const first = email.to[0];
+                to_addr = typeof first === 'string' ? { address: first } : { name: first.name, address: first.address };
+            }
+        } else {
+            to_addr = { name: email.to.name, address: email.to.address };
+        }
+    } else if (typeof email.to === 'string' && email.to.trim()) {
+        to_addr = { address: email.to.trim() };
     }
 
     const date_raw = email.date || null;
@@ -239,6 +253,7 @@ export function normalizeParserResult(
 
     return {
         from,
+        to: to_addr,
         subject: email.subject || null,
         date_raw,
         date_iso,

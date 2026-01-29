@@ -9,6 +9,7 @@ export interface MimeResult {
     history: HistoryEntry[];
     metadata?: {
         from?: any;
+        to?: any;
         subject?: string;
         date?: Date;
     };
@@ -34,9 +35,13 @@ export async function processMime(raw: string, options: Options): Promise<MimeRe
 
             // Record current level in history
             history.push({
-                from: parsed.from?.value?.[0] ? {
-                    name: parsed.from.value[0].name,
-                    address: parsed.from.value[0].address
+                from: (parsed.from as any)?.value?.[0] ? {
+                    name: (parsed.from as any).value[0].name,
+                    address: (parsed.from as any).value[0].address
+                } : null,
+                to: (parsed.to as any)?.value?.[0] ? {
+                    name: (parsed.to as any).value[0].name,
+                    address: (parsed.to as any).value[0].address
                 } : null,
                 subject: parsed.subject || null,
                 date_raw: parsed.date?.toString() || null,
@@ -75,6 +80,7 @@ export async function processMime(raw: string, options: Options): Promise<MimeRe
                 history,
                 metadata: {
                     from: parsed.from,
+                    to: parsed.to,
                     subject: parsed.subject,
                     date: parsed.date
                 }

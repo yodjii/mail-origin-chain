@@ -109,6 +109,7 @@ export class NewOutlookDetector implements ForwardDetector {
             found: true,
             email: {
                 from: address ? { name: name.replace(/["']/g, ''), address: address } : name,
+                to: to ? to.value : undefined,
                 subject: subject.value,
                 date: date ? date.value : undefined,
                 body: finalBody

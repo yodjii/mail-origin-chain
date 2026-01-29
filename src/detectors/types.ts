@@ -8,6 +8,7 @@ export interface DetectionResult {
     /** Extracted email data if found */
     email?: {
         from: string | { name: string; address: string };
+        to?: string | { name: string; address: string };
         subject?: string;
         date?: string;
         body?: string;

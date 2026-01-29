@@ -114,6 +114,7 @@ export class OutlookFRDetector implements ForwardDetector {
                 from: fromEmail.includes('@')
                     ? { name: fromName !== fromEmail ? fromName : '', address: fromEmail }
                     : { name: fromName, address: fromName },
+                to: a ? extractValue(a.line) : undefined,
                 subject,
                 date: dateRaw,
                 body: finalBody

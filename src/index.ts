@@ -43,6 +43,7 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
 
         // Step 3: Align results
         let from = normalizeFrom(inlineResult.from);
+        let to = inlineResult.to;
         let subject = inlineResult.subject;
         let date_raw = inlineResult.date_raw;
         let date_iso = inlineResult.date_iso;
@@ -52,6 +53,9 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
             const m = mimeResult.metadata;
             if (!from && m.from?.value?.[0]) {
                 from = normalizeFrom({ name: m.from.value[0].name, address: m.from.value[0].address });
+            }
+            if (!to && m.to?.value?.[0]) {
+                to = normalizeFrom({ name: m.to.value[0].name, address: m.to.value[0].address });
             }
             if (!subject && m.subject) subject = m.subject;
             if (!date_iso && m.date) date_iso = m.date.toISOString();
@@ -66,6 +70,9 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
                 const m = mimeResult.metadata;
                 if (m.from?.value?.[0]) {
                     rootInHistory.from = normalizeFrom({ name: m.from.value[0].name, address: m.from.value[0].address });
+                }
+                if (m.to?.value?.[0]) {
+                    rootInHistory.to = normalizeFrom({ name: m.to.value[0].name, address: m.to.value[0].address });
                 }
                 if (m.subject) rootInHistory.subject = m.subject;
             }
@@ -87,6 +94,7 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
             ...restInlineResult,
             // Use our normalized/enriched values
             from,
+            to,
             subject,
             date_raw,
             date_iso,
@@ -107,6 +115,7 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
     } catch (error) {
         return {
             from: null,
+            to: null,
             subject: null,
             date_raw: null,
             date_iso: null,

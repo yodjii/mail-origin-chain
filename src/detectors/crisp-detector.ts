@@ -29,10 +29,16 @@ export class CrispDetector implements ForwardDetector {
                 ? { name: from.name || '', address: from.address || '' }
                 : '';
 
+        const to = result.email.to;
+        const toValue = Array.isArray(to) && to.length > 0
+            ? (typeof to[0] === 'string' ? to[0] : { name: (to[0] as any).name || '', address: (to[0] as any).address || '' })
+            : (typeof to === 'string' ? to : undefined);
+
         return {
             found: true,
             email: {
                 from: fromValue,
+                to: toValue,
                 subject: result.email.subject || undefined,
                 date: result.email.date || undefined,
                 body: result.email.body || undefined

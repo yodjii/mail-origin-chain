@@ -28,6 +28,7 @@ export async function processInline(
     if (history.length === 0) {
         history.push({
             from: null,
+            to: null,
             subject: null,
             date_raw: null,
             date_iso: null,
@@ -97,10 +98,22 @@ export async function processInline(
 
         fromNormalized = normalizeFrom(fromNormalized);
 
+        // Normalize to address
+        let toNormalized: import('./types').EmailAddress | null = typeof email.to === 'object'
+            ? { name: email.to.name, address: email.to.address }
+            : (email.to ? { address: email.to } : null);
+
+        if (typeof email.to === 'string') {
+            toNormalized = normalizeFrom({ address: email.to });
+        } else if (toNormalized) {
+            toNormalized = normalizeFrom(toNormalized);
+        }
+
         // Add this forward level to history
         const cleanedBody = cleanText(email.body || '');
         history.push({
             from: fromNormalized,
+            to: toNormalized,
             subject: email.subject || null,
             date_raw: email.date || null,
             date_iso: dateIso,
@@ -128,6 +141,7 @@ export async function processInline(
             date_raw: deepestEntry.date_raw,
             date_iso: deepestEntry.date_iso,
             text: deepestEntry.text,
+            to: deepestEntry.to,
             attachments: [],
             history: history.slice().reverse(),
             diagnostics: {
@@ -147,6 +161,7 @@ export async function processInline(
         date_raw: currentEntry.date_raw,
         date_iso: currentEntry.date_iso,
         text: currentEntry.text || cleanText(currentText),
+        to: currentEntry.to,
         attachments: [],
         history: history.slice().reverse(),
         diagnostics: {
