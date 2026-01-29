@@ -51,7 +51,8 @@ describe('Confidence Scoring System', () => {
 
         const result = calculateConfidence(body, depth);
         expect(result.score).toBe(100);
-        expect(result.description).toContain('High Density Header');
+        expect(result.description).toContain('High Density');
+        expect(result.description).toContain('Validated Density');
     });
 
     test('Suspect High Density (Missed Separator) -> Score 25', () => {
@@ -69,7 +70,7 @@ describe('Confidence Scoring System', () => {
 
         const result = calculateConfidence(body, depth);
         expect(result.score).toBe(25);
-        expect(result.description).toContain('Detected 2 senders');
+        expect(result.description).toContain('Sender Mismatch: Found 2 senders');
     });
 
     test('Suspect High Density (Missed Inline/Gmail Separator) -> Score 25', () => {
@@ -87,7 +88,7 @@ describe('Confidence Scoring System', () => {
 
         const result = calculateConfidence(body, depth);
         expect(result.score).toBe(25);
-        expect(result.description).toContain('Detected 2 senders');
+        expect(result.description).toContain('Sender Mismatch: Found 2 senders');
     });
 
     test('Suspect High Density (Decorated *From :* Separator) -> Score 25', () => {
@@ -106,7 +107,27 @@ describe('Confidence Scoring System', () => {
 
         const result = calculateConfidence(body, depth);
         expect(result.score).toBe(25);
-        expect(result.description).toContain('Detected 2 senders');
+        expect(result.description).toContain('Sender Mismatch: Found 2 senders');
+    });
+
+    test('Suspect High Density (Quote Depth Mismatch) -> Score 25', () => {
+        // Depth 1, but we see ">>" (Depth 2)
+        const depth = 1;
+        const body = `
+        Hello
+        
+        > From: Alice <alice@a.com>
+        > To: Bob <bob@a.com>
+        > 
+        > >> No sender keyword here
+        > >> Message from someone
+        `;
+
+        const result = calculateConfidence(body, depth);
+        // console.log('DEBUG RESULT:', JSON.stringify(result, null, 2));
+        expect(result.score).toBe(25);
+        expect(result.description).toContain('Quote Mismatch: Max quote nesting 3 exceeds detected depth 1');
+        expect(result.quote_depth).toBe(3);
     });
 
     test('Suspect High Density (Ratio > 2.4 + No Headers) -> Score 25', () => {
@@ -116,7 +137,7 @@ describe('Confidence Scoring System', () => {
 
         const result = calculateConfidence(body, depth);
         expect(result.score).toBe(25);
-        expect(result.description).toContain('Suspect');
+        expect(result.description).toContain('High Density');
     });
 
     test('Integration Test with Real Fixture', async () => {

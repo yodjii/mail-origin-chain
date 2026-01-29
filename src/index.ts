@@ -111,6 +111,9 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
             confidence_ratio: confidence.ratio,
             confidence_email_count: confidence.email_count,
             confidence_sender_count: confidence.sender_count,
+            confidence_quote_depth: confidence.quote_depth,
+            confidence_signals: confidence.signals,
+            confidence_reasons: confidence.reasons,
 
             attachments: [...attachments, ...inlineResult.attachments],
             diagnostics: {

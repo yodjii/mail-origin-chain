@@ -16,6 +16,10 @@ This directory contains the documentation for the refactor of the `email-deepest
     *   Implementation of `OutlookFRDetector`, `NewOutlookDetector`, and `ReplyDetector`.
     *   Achieved **100% compatibility** with 239/239 body fixtures.
 
+4.  **[Confidence Scoring System](../confidence_scoring.md)**
+    *   Implementation of the signal-based reliability evaluation.
+    *   Handles email density, sender count mismatches, and quote level analysis.
+
 ## Planning & Reports
 
 *   **[Overall Plugin Plan](plugin_plan.md)**: The technical blueprint for the refactor.

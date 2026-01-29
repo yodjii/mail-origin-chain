@@ -17,6 +17,7 @@ Detailed documentation can be found in the [docs/architecture/](docs/architectur
 - [Phase 2: Plugin Architecture](docs/architecture/phase2_plugin_foundation.md)
 - [Phase 3: Full Compatibility (100%)](docs/architecture/phase3_fallbacks.md)
 - [Deep Forward Fix Walkthrough](docs/walkthrough_deep_forward_fix.md)
+- [Confidence Scoring System](docs/confidence_scoring.md)
 - [Detector Usage & Priorities](docs/detectors_usage.md)
 
 **✅ Test Coverage:** The library has been validated against **239 fixtures** from the `email-forward-parser-recursive` library with a **100% success rate** (239/239). This includes validating message bodies and ensuring non-message snippets are correctly identified. See [Test Coverage Report](docs/TEST_COVERAGE.md) for details.
@@ -77,6 +78,10 @@ The library returns a `ResultObject` with the following structure:
 | `text` | `string \| null` | Cleaned body content of the deepest message. |
 | `attachments` | `array` | Metadata for MIME attachments found at the deepest level. |
 | `history` | `array` | **Conversation Chaining**: Full audit trail of the discussion (see below). |
+| `confidence_score` | `number` | Reliability score (0-100) based on signal analysis. |
+| `confidence_description` | `string` | Human-readable explanation of the score. |
+| `confidence_signals` | `object` | Key-value breakdown of triggered bonuses and penalties. |
+| `confidence_reasons` | `array` | Detailed list of triggered scoring rules. |
 | `diagnostics` | `object` | Metadata about the parsing process. |
 
 ### Diagnostics Detail
@@ -116,6 +121,22 @@ Each history entry contains its own `from`, `to`, `cc`, `subject`, `date_iso`, `
 - `content:silent_forward`: The user forwarded the message without adding any text.
 - `date:unparseable`: A date string was found but could not be normalized to ISO.
 
+## Confidence Scoring System
+
+To ensure high-quality extraction from text-based forwards, the library uses a **Signal-Based Confidence Score**. It analyzes metrics like email address density, sender count consistency, and quote levels to detect "Garbage" or incomplete chains.
+
+### Scoring Logic:
+- **Baseline**: 100% confidence for standard formatting (~2 emails per level).
+- **Penalties**:
+    - **Sender Mismatch**: More senders found than levels detected (-75%).
+    - **Quote Mismatch**: Quote nesting deeper than detected levels (-75%).
+    - **Partial Chain**: Only 1 email detected per level (-50%).
+    - **Ghost Forward**: No emails found in text (-100%).
+- **Bonuses**:
+    - **Validated Density**: High email density corroborated by context headers (+75%).
+
+Check the [Confidence Scoring Documentation](docs/confidence_scoring.md) for full details.
+
 ### Typical Output Example
 
 ```json
@@ -148,7 +169,13 @@ Each history entry contains its own `from`, `to`, `cc`, `subject`, `date_iso`, `
     "depth": 2,
     "parsedOk": true,
     "warnings": []
-  }
+  },
+  "confidence_score": 100,
+  "confidence_description": "High Confidence: Standard Density: Ratio 2.00 is optimal (~2 emails per level)",
+  "confidence_signals": {},
+  "confidence_reasons": [
+    "Standard Density: Ratio 2.00 is optimal (~2 emails per level)"
+  ]
 }
 ```
 
@@ -278,7 +305,13 @@ console.log(result.diagnostics.depth); // 4 (5 messages total)
     "depth": 4,
     "parsedOk": true,
     "warnings": []
-  }
+  },
+  "confidence_score": 100,
+  "confidence_description": "High Confidence: Standard Density: Ratio 2.00 is optimal (~2 emails per level)",
+  "confidence_signals": {},
+  "confidence_reasons": [
+    "Standard Density: Ratio 2.00 is optimal (~2 emails per level)"
+  ]
 }
 ```
 

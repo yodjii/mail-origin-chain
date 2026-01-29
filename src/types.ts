@@ -47,6 +47,9 @@ export interface ResultObject {
     confidence_ratio?: number;
     confidence_email_count?: number;
     confidence_sender_count?: number;
+    confidence_quote_depth?: number;
+    confidence_signals?: Record<string, number>;
+    confidence_reasons?: string[];
 
     attachments: Attachment[];
     history: HistoryEntry[];
