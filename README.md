@@ -1,6 +1,6 @@
 # email-deepest-forward
 
-Private NPM package to extract the **deepest** (original) sender and content from forwarded emails.
+**Uncover the full audit trail of your email threads.** Recursively deep-dives into forwards and replies to reconstruct the entire conversation history. Combines MIME traversal with multi-language text detection for a perfect message chain—giving you instant access to the original sender's details and the true source message.
 
 ## Architecture & Refactor
 
