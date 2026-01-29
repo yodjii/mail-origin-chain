@@ -7,13 +7,17 @@
 export interface ConfidenceResult {
     score: number; // 0 to 100
     description: string; // Human readable explanation
+    // Details
+    ratio: number;
+    email_count: number;
+    sender_count: number;
 }
 
 export function calculateConfidence(fullBody: string, depth: number): ConfidenceResult {
     // 0. Base case: No depth detected implies no confidence metric applicable (N/A)
     // We return a neutral high score because there is no mismatch to detect.
     if (depth === 0) {
-        return { score: 100, description: "N/A (No depth detected)" };
+        return { score: 100, description: "N/A (No depth detected)", ratio: 0, email_count: 0, sender_count: 0 };
     }
 
     // 1. Count emails strictly between angle brackets <...>
@@ -77,11 +81,18 @@ export function calculateConfidence(fullBody: string, depth: number): Confidence
     const buildRegex = (words: string[], strict: boolean = false) => {
         const sorted = Array.from(new Set(words)).sort((a, b) => b.length - a.length);
         const joined = sorted.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+
+        // Allow optional decorative characters (Markdown *, _, or >) before/after the keyword
+        // e.g. "*From :*" or "> From:"
+        const prefix = `[\\*\\_\\>]*\\s*`;
+        const suffix = `\\s*[\\*\\_]*\\s*`;
+
         // If strict, we want the pattern to appear at the END of the preText (ignoring name chars)
         if (strict) {
-            return new RegExp(`(?:${joined})\\s*:\\s*[^:\\n]*$`, 'i');
+            // (?:Prefix)(Keyword)(Suffix) : [Content]$
+            return new RegExp(`(?:${prefix}(?:${joined})${suffix})\\s*:\\s*[^:\\n]*$`, 'i');
         }
-        return new RegExp(`(?:${joined})\\s*:`, 'i');
+        return new RegExp(`(?:${prefix}(?:${joined})${suffix})\\s*:`, 'i');
     };
 
     const buildTrailingRegex = (words: string[]) => {
@@ -121,16 +132,17 @@ export function calculateConfidence(fullBody: string, depth: number): Confidence
 
 
     // ⚖️  APPLY RULES ⚖️
+    const details = { ratio, email_count: count, sender_count: fromCount };
 
     // 1. CRITICAL CHECK: Missed Separators (Too many senders)
     // Applies regardless of ratio logic.
     if (fromCount > depth) {
-        return { score: 25, description: `Low Confidence (Suspect: Detected ${fromCount} senders for depth ${depth})` };
+        return { score: 25, description: `Low Confidence (Suspect: Detected ${fromCount} senders for depth ${depth})`, ...details };
     }
 
     // 2. Ghost Forward (0 emails)
     if (count === 0) {
-        return { score: 0, description: "Low Confidence (Ghost Forward: 0 emails found)" };
+        return { score: 0, description: "Low Confidence (Ghost Forward: 0 emails found)", ...details };
     }
 
     // 3. High Density Check (Ratio > 2.4)
@@ -139,9 +151,9 @@ export function calculateConfidence(fullBody: string, depth: number): Confidence
         const threshold = 0.6; // 60% of emails must be explained by headers
 
         if (explainedRatio >= threshold) {
-            return { score: 100, description: "High Confidence (High Density Header Chain)" };
+            return { score: 100, description: "High Confidence (High Density Header Chain)", ...details };
         } else {
-            return { score: 25, description: "Low Confidence (Suspect: High density without headers)" };
+            return { score: 25, description: "Low Confidence (Suspect: High density without headers)", ...details };
         }
     }
 
@@ -149,14 +161,14 @@ export function calculateConfidence(fullBody: string, depth: number): Confidence
 
     // Ratio ~2.0 (Standard)
     if (ratio > 1.5 && ratio <= 2.4) {
-        return { score: 100, description: "High Confidence (Standard: ~2 emails per level)" };
+        return { score: 100, description: "High Confidence (Standard: ~2 emails per level)", ...details };
     }
 
     // Ratio ~1.0 (Partial)
     if (ratio >= 0.5 && ratio <= 1.5) {
-        return { score: 50, description: "Medium Confidence (Partial: ~1 email per level)" };
+        return { score: 50, description: "Medium Confidence (Partial: ~1 email per level)", ...details };
     }
 
     // Fallback
-    return { score: 0, description: "Low Confidence (Inconsistent)" };
+    return { score: 0, description: "Low Confidence (Inconsistent)", ...details };
 }

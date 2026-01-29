@@ -44,6 +44,9 @@ export interface ResultObject {
     // Confidence Metrics
     confidence_score?: number; // 0-100
     confidence_description?: string; // Human readable reason
+    confidence_ratio?: number;
+    confidence_email_count?: number;
+    confidence_sender_count?: number;
 
     attachments: Attachment[];
     history: HistoryEntry[];

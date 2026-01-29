@@ -90,6 +90,25 @@ describe('Confidence Scoring System', () => {
         expect(result.description).toContain('Detected 2 senders');
     });
 
+    test('Suspect High Density (Decorated *From :* Separator) -> Score 25', () => {
+        // Depth 1, but found 2 decorated "From" headers
+        const depth = 1;
+        const body = `
+        > *De :* User A <a@gmail.com>
+        > *Envoyé :* lundi 26 juin 2023
+        > *À :* recipient
+        > 
+        > Message 1
+        
+        > *De :* User B <b@gmail.com>
+        > *Objet :* Relance
+        `;
+
+        const result = calculateConfidence(body, depth);
+        expect(result.score).toBe(25);
+        expect(result.description).toContain('Detected 2 senders');
+    });
+
     test('Suspect High Density (Ratio > 2.4 + No Headers) -> Score 25', () => {
         // Depth 1, 5 Emails scattered in text without headers
         const depth = 1;
