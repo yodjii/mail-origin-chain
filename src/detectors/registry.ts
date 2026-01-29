@@ -16,12 +16,12 @@ export class DetectorRegistry {
 
     constructor(customDetectors: ForwardDetector[] = []) {
         // Register all detectors (priority determines order)
-        this.register(new CrispDetector());        // priority: 0 (highest - universal library)
-        this.register(new OutlookEmptyHeaderDetector()); // priority: 5 (handle empty headers)
-        this.register(new OutlookReverseFrDetector());   // priority: 6 (handle reversed FR headers)
-        this.register(new ReplyDetector());              // priority: 7 (handle standard replies)
-        this.register(new OutlookFRDetector());    // priority: 10 (fallback for FR formats)
-        this.register(new NewOutlookDetector());   // priority: 10 (fallback for new Outlook)
+        this.register(new OutlookEmptyHeaderDetector()); // priority: -50 (Very specific)
+        this.register(new OutlookReverseFrDetector());   // priority: -45 (Specific)
+        this.register(new NewOutlookDetector());         // priority: -40 (Specific)
+        this.register(new OutlookFRDetector());          // priority: -30 (Fallback for FR)
+        this.register(new ReplyDetector());              // priority: -10 (Replies)
+        this.register(new CrispDetector());               // priority: 100 (Universal fallback)
 
         // Register custom detectors
         customDetectors.forEach(detector => this.register(detector));

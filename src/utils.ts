@@ -206,6 +206,9 @@ export function normalizeFrom(from: EmailAddress | null | undefined): EmailAddre
         from.address = from.address.replace(/^[\*\_]+|[\*\_]+$/g, '').trim();
     }
 
+    // FINAL VALIDATION: If at the end we have no address and no name, return null
+    if (!from.address && !from.name) return null;
+
     return from;
 }
 

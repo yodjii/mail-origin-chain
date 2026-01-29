@@ -1,6 +1,6 @@
 {
   "name": "email-origin-chain",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Uncover the full audit trail of your email threads. Recursively reconstructs the entire conversation history with instant access to the original sender and true source message.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

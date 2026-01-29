@@ -12,7 +12,7 @@ import { Cleaner } from '../utils/cleaner';
  */
 export class OutlookEmptyHeaderDetector implements ForwardDetector {
     readonly name = 'outlook_empty_header';
-    readonly priority = 50; // Fallback for corrupted headers (after specifics, before generic Crisp)
+    readonly priority = -50; // Very specific - High Priority
 
     // Regex to capture the header block:
     // 1. Optional Separator (mostly underscores)
@@ -56,6 +56,7 @@ export class OutlookEmptyHeaderDetector implements ForwardDetector {
                     message: message || undefined,
                     email: {
                         from: fromLine,
+                        to: toLine,
                         subject: subjectLine,
                         date: dateLine || undefined,
                         body: finalBody

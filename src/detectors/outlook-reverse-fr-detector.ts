@@ -6,7 +6,7 @@ import { Cleaner } from '../utils/cleaner';
  */
 export class OutlookReverseFrDetector implements ForwardDetector {
     readonly name = 'outlook_reverse_fr';
-    readonly priority = -20; // Specific detector - High Priority (Override)
+    readonly priority = -45; // Specific detector - High Priority
 
     // Regex patterns for field detection
     private readonly ENVOYE_PATTERN = /^[ \t]*Envoy(?:é|=E9|e)?\s*:\s*(.*?)\s*$/m;
@@ -83,6 +83,7 @@ export class OutlookReverseFrDetector implements ForwardDetector {
                 from: fromEmail.includes('@')
                     ? { name: fromName !== fromEmail ? fromName : '', address: fromEmail }
                     : { name: fromName, address: fromName },
+                to: a ? extractValue(a.line) : undefined,
                 subject: objet ? extractValue(objet.line) : '',
                 date: extractValue(envoyeMatch[0]),
                 body: finalBody

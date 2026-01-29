@@ -145,7 +145,7 @@ export async function processInline(
             attachments: [],
             history: history.slice().reverse(),
             diagnostics: {
-                method: (deepestEntry.flags.find(f => f.startsWith('method:')) || 'inline') as any,
+                method: (deepestEntry.flags.find(f => f.startsWith('method:'))?.replace('method:', '') || 'inline') as any,
                 depth: currentDepth - startingDepth,
                 parsedOk: true,
                 warnings: warnings

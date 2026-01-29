@@ -75,7 +75,7 @@ Just plain text.
         });
 
         // Diagnostics should show our custom method
-        expect(result.diagnostics.method).toBe('method:magic-plugin');
+        expect(result.diagnostics.method).toBe('magic-plugin');
 
         // Depth should be 1 (we found one forward)
         expect(result.diagnostics.depth).toBe(1);
@@ -166,7 +166,7 @@ Deepest message body.
         });
 
         // Should choose 'high-prio' because priorities are checked for ties at index 0
-        expect(result.diagnostics.method).toBe('method:high-prio');
+        expect(result.diagnostics.method).toBe('high-prio');
         expect(result.from?.address).toBe('high@test.com');
     });
 

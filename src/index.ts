@@ -43,7 +43,7 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
 
         // Step 3: Align results
         let from = normalizeFrom(inlineResult.from);
-        let to = inlineResult.to;
+        let to = normalizeFrom(inlineResult.to);
         let subject = inlineResult.subject;
         let date_raw = inlineResult.date_raw;
         let date_iso = inlineResult.date_iso;
@@ -51,10 +51,10 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
 
         if (inlineResult.diagnostics.method === 'fallback' && mimeResult.metadata) {
             const m = mimeResult.metadata;
-            if (!from && m.from?.value?.[0]) {
+            if ((!from || !from.address) && m.from?.value?.[0]) {
                 from = normalizeFrom({ name: m.from.value[0].name, address: m.from.value[0].address });
             }
-            if (!to && m.to?.value?.[0]) {
+            if ((!to || !to.address) && m.to?.value?.[0]) {
                 to = normalizeFrom({ name: m.to.value[0].name, address: m.to.value[0].address });
             }
             if (!subject && m.subject) subject = m.subject;
