@@ -1,5 +1,5 @@
 {
-  "name": "mail-origin-chain",
+  "name": "email-origin-chain",
   "version": "1.0.0",
   "description": "Uncover the full audit trail of your email threads. Recursively reconstructs the entire conversation history with instant access to the original sender and true source message.",
   "main": "dist/index.js",
@@ -12,12 +12,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yodjii/mail-origin-chain.git"
+    "url": "git+https://github.com/yodjii/email-origin-chain.git"
   },
   "bugs": {
-    "url": "https://github.com/yodjii/mail-origin-chain/issues"
+    "url": "https://github.com/yodjii/email-origin-chain/issues"
   },
-  "homepage": "https://github.com/yodjii/mail-origin-chain#readme",
+  "homepage": "https://github.com/yodjii/email-origin-chain#readme",
   "scripts": {
     "build": "tsc",
     "test": "jest",

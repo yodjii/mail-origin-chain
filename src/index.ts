@@ -13,8 +13,8 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
     }
 
     const opts = {
-        maxDepth: options?.maxDepth ?? 5,
-        timeoutMs: options?.timeoutMs ?? 5000,
+        maxDepth: options?.maxDepth ?? 15,
+        timeoutMs: options?.timeoutMs ?? 10000,
         skipMimeLayer: options?.skipMimeLayer ?? false,
         customDetectors: options?.customDetectors ?? []
     };
