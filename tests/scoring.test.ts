@@ -72,6 +72,24 @@ describe('Confidence Scoring System', () => {
         expect(result.description).toContain('Detected 2 senders');
     });
 
+    test('Suspect High Density (Missed Inline/Gmail Separator) -> Score 25', () => {
+        // Depth 1, but found 2 "On ... wrote:" patterns
+        const depth = 1;
+        const body = `
+        On Mon, Jan 1, 2023 at 10:00 AM, User A <a@gmail.com> wrote:
+        > Hey
+        
+        ...
+        
+        On Tue, Jan 2, 2023 at 11:00 AM, User B <b@gmail.com> wrote:
+        > Double hey
+        `;
+
+        const result = calculateConfidence(body, depth);
+        expect(result.score).toBe(25);
+        expect(result.description).toContain('Detected 2 senders');
+    });
+
     test('Suspect High Density (Ratio > 2.4 + No Headers) -> Score 25', () => {
         // Depth 1, 5 Emails scattered in text without headers
         const depth = 1;

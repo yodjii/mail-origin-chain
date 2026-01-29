@@ -30,105 +30,111 @@ export function calculateConfidence(fullBody: string, depth: number): Confidence
     const count = emails.length;
     const ratio = count / depth;
 
-    // 2. Base Rules (Small numbers)
+    // 🚧 SETUP ANALYSIS TOOLS 🚧
+    let explainedCount = 0;
+    let fromCount = 0;
 
-    // CASE: Ghost Forward (Depth detected but 0 emails found)
+    // Look back 150 chars for context
+    const contextWindow = 150;
+
+    // Keywords from email-forward-parser (parser.js) covering multiple languages
+    // Includes: From, To, Cc, Reply-To and their localized variants
+    const keywords = [
+        // From
+        "From", "Od", "Fra", "Von", "De", "Lähettäjä", "Šalje", "Feladó", "Da", "Van", "Expeditorul",
+        "Отправитель", "Från", "Kimden", "Від кого", "Saatja", "De la", "Gönderen", "От", "Від",
+        "Mittente", "Nadawca", "送信元",
+
+        // To
+        "To", "Komu", "Til", "An", "Para", "Vastaanottaja", "À", "Prima", "Címzett", "A", "Aan", "Do",
+        "Destinatarul", "Кому", "Pre", "Till", "Kime", "Pour", "Adresat", "送信先",
+
+        // Cc
+        "Cc", "CC", "Kopie", "Kopio", "Másolat", "Kopi", "Dw", "Копия", "Kopia", "Bilgi", "Копія",
+        "Másolatot kap", "Kópia", "Copie à",
+
+        // Reply-To
+        "Reply-To", "Odgovori na", "Odpověď na", "Svar til", "Antwoord aan", "Vastaus", "Répondre à",
+        "Antwort an", "Válaszcím", "Rispondi a", "Odpowiedź-do", "Responder A", "Responder a",
+        "Răspuns către", "Ответ-Кому", "Odpovedať-Pre", "Svara till", "Yanıt Adresi", "Кому відповісти",
+        "Appreciated" // Legacy/Specific
+    ];
+
+    // Keywords specific to Senders (From) to detect missed separators
+    const fromKeywords = [
+        "From", "Od", "Fra", "Von", "De", "Lähettäjä", "Šalje", "Feladó", "Da", "Van", "Expeditorul",
+        "Отправитель", "Från", "Kimden", "Від кого", "Saatja", "De la", "Gönderen", "От", "Від",
+        "Mittente", "Nadawca", "送信元"
+    ];
+
+    // Keywords appearing AFTER the email (e.g. "On ... <email> wrote:")
+    const trailingSenderKeywords = [
+        "wrote", "escribió", "a écrit", "kirjoitti", "ezt írta", "ha scritto", "geschreven", "skrev",
+        "napisał", "escreveu", "написал", "napísal", "följande", "tarihinde şunu yazdı", "napsal"
+    ];
+
+    // Construct regexes
+    const buildRegex = (words: string[], strict: boolean = false) => {
+        const sorted = Array.from(new Set(words)).sort((a, b) => b.length - a.length);
+        const joined = sorted.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+        // If strict, we want the pattern to appear at the END of the preText (ignoring name chars)
+        if (strict) {
+            return new RegExp(`(?:${joined})\\s*:\\s*[^:\\n]*$`, 'i');
+        }
+        return new RegExp(`(?:${joined})\\s*:`, 'i');
+    };
+
+    const buildTrailingRegex = (words: string[]) => {
+        const sorted = Array.from(new Set(words)).sort((a, b) => b.length - a.length);
+        const joined = sorted.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+        // Check if postText starts with " wrote:" or similar
+        return new RegExp(`^\\s*(?:${joined})\\s*:`, 'i');
+    }
+
+    const headerPattern = buildRegex(keywords, false); // Loose check for "context"
+    const fromPattern = buildRegex(fromKeywords, true); // Strict check for "Sender" (Prefix)
+    const trailingPattern = buildTrailingRegex(trailingSenderKeywords); // Strict check for "Sender" (Suffix)
+
+    // 🏃 RUN ANALYSIS LOOP 🏃
+    for (const email of emails) {
+        // Extract the text chunk preceding the email
+        const start = Math.max(0, email.index - contextWindow);
+        const preText = fullBody.substring(start, email.index);
+
+        // Extract text following the email (for "wrote:" check)
+        const postText = fullBody.substring(email.index + email.addr.length);
+
+        // Get the "logical block" (lines near the email)
+        const blocks = preText.split(/\n\s*\n/);
+        const currentBlock = blocks[blocks.length - 1];
+
+        if (headerPattern.test(currentBlock)) {
+            explainedCount++;
+        }
+
+        // For From Check: Look strictly at the text immediately preceding the email
+        // OR the text immediately following (for "On ... wrote:")
+        if (fromPattern.test(preText) || trailingPattern.test(postText)) {
+            fromCount++;
+        }
+    }
+
+
+    // ⚖️  APPLY RULES ⚖️
+
+    // 1. CRITICAL CHECK: Missed Separators (Too many senders)
+    // Applies regardless of ratio logic.
+    if (fromCount > depth) {
+        return { score: 25, description: `Low Confidence (Suspect: Detected ${fromCount} senders for depth ${depth})` };
+    }
+
+    // 2. Ghost Forward (0 emails)
     if (count === 0) {
         return { score: 0, description: "Low Confidence (Ghost Forward: 0 emails found)" };
     }
 
-    // CASE: Partial (Ratio ~1.0)
-    // Likely only Sender found per level. Valid but incomplete.
-    if (ratio >= 0.5 && ratio <= 1.5) {
-        return { score: 50, description: "Medium Confidence (Partial: ~1 email per level)" };
-    }
-
-    // CASE: Standard (Ratio ~2.0)
-    // The gold standard: 1 Sender + 1 Recipient per level.
-    if (ratio > 1.5 && ratio <= 2.4) {
-        return { score: 100, description: "High Confidence (Standard: ~2 emails per level)" };
-    }
-
     // 3. High Density Check (Ratio > 2.4)
     if (ratio > 2.4) {
-        // We need to distinguish between "Rich Headers" (Good) and "Missed Separators" (Bad)
-        // Heuristic: Check if emails are physically located near Header Keywords.
-
-        let explainedCount = 0;
-        // Look back 150 chars for context
-        const contextWindow = 150;
-        // Keywords from email-forward-parser (parser.js) covering multiple languages
-        // Includes: From, To, Cc, Reply-To and their localized variants
-        const keywords = [
-            // From
-            "From", "Od", "Fra", "Von", "De", "Lähettäjä", "Šalje", "Feladó", "Da", "Van", "Expeditorul",
-            "Отправитель", "Från", "Kimden", "Від кого", "Saatja", "De la", "Gönderen", "От", "Від",
-            "Mittente", "Nadawca", "送信元",
-
-            // To
-            "To", "Komu", "Til", "An", "Para", "Vastaanottaja", "À", "Prima", "Címzett", "A", "Aan", "Do",
-            "Destinatarul", "Кому", "Pre", "Till", "Kime", "Pour", "Adresat", "送信先",
-
-            // Cc
-            "Cc", "CC", "Kopie", "Kopio", "Másolat", "Kopi", "Dw", "Копия", "Kopia", "Bilgi", "Копія",
-            "Másolatot kap", "Kópia", "Copie à",
-
-            // Reply-To
-            "Reply-To", "Odgovori na", "Odpověď na", "Svar til", "Antwoord aan", "Vastaus", "Répondre à",
-            "Antwort an", "Válaszcím", "Rispondi a", "Odpowiedź-do", "Responder A", "Responder a",
-            "Răspuns către", "Ответ-Кому", "Odpovedať-Pre", "Svara till", "Yanıt Adresi", "Кому відповісти",
-            "Appreciated" // Legacy/Specific
-        ];
-
-        // Keywords specific to Senders (From) to detect missed separators
-        const fromKeywords = [
-            "From", "Od", "Fra", "Von", "De", "Lähettäjä", "Šalje", "Feladó", "Da", "Van", "Expeditorul",
-            "Отправитель", "Från", "Kimden", "Від кого", "Saatja", "De la", "Gönderen", "От", "Від",
-            "Mittente", "Nadawca", "送信元"
-        ];
-
-        // Construct regexes
-        const buildRegex = (words: string[], strict: boolean = false) => {
-            const sorted = Array.from(new Set(words)).sort((a, b) => b.length - a.length);
-            const joined = sorted.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-            // If strict, we want the pattern to appear at the END of the preText (ignoring name chars)
-            if (strict) {
-                return new RegExp(`(?:${joined})\\s*:\\s*[^:\\n]*$`, 'i');
-            }
-            return new RegExp(`(?:${joined})\\s*:`, 'i');
-        };
-
-        const headerPattern = buildRegex(keywords, false); // Loose check for "context"
-        const fromPattern = buildRegex(fromKeywords, true); // Strict check for "Sender"
-
-        let fromCount = 0;
-
-        for (const email of emails) {
-            // Extract the text chunk preceding the email
-            const start = Math.max(0, email.index - contextWindow);
-            const preText = fullBody.substring(start, email.index);
-
-            // Get the "logical block" (lines near the email)
-            const blocks = preText.split(/\n\s*\n/);
-            const currentBlock = blocks[blocks.length - 1];
-
-            if (headerPattern.test(currentBlock)) {
-                explainedCount++;
-            }
-
-            // For From Check: Look strictly at the text immediately preceding the email
-            if (fromPattern.test(preText)) {
-                fromCount++;
-            }
-        }
-
-        // CRITICAL CHECK: If we see more "From:" headers than the depth, 
-        // it means we likely missed some separators.
-        // e.g. Depth 1, but we see 2 "From:" => Suspect.
-        if (fromCount > depth) {
-            return { score: 25, description: `Low Confidence (Suspect: Detected ${fromCount} senders for depth ${depth})` };
-        }
-
         const explainedRatio = count > 0 ? explainedCount / count : 0;
         const threshold = 0.6; // 60% of emails must be explained by headers
 
@@ -139,6 +145,18 @@ export function calculateConfidence(fullBody: string, depth: number): Confidence
         }
     }
 
-    // Fallback for weird intermediate ratios (e.g. 0.3)
+    // 4. Standard Ratios
+
+    // Ratio ~2.0 (Standard)
+    if (ratio > 1.5 && ratio <= 2.4) {
+        return { score: 100, description: "High Confidence (Standard: ~2 emails per level)" };
+    }
+
+    // Ratio ~1.0 (Partial)
+    if (ratio >= 0.5 && ratio <= 1.5) {
+        return { score: 50, description: "Medium Confidence (Partial: ~1 email per level)" };
+    }
+
+    // Fallback
     return { score: 0, description: "Low Confidence (Inconsistent)" };
 }
