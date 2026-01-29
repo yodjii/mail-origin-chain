@@ -1,5 +1,9 @@
 # email-origin-chain
 
+[![npm version](https://img.shields.io/npm/v/email-origin-chain.svg)](https://www.npmjs.com/package/email-origin-chain)
+[![npm downloads](https://img.shields.io/npm/dm/email-origin-chain.svg)](https://www.npmjs.com/package/email-origin-chain)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **Uncover the full audit trail of your email threads.** Recursively deep-dives into forwards and replies to reconstruct the entire conversation history. Combines MIME traversal with multi-language text detection for a perfect message chain—giving you instant access to the original sender's details and the true source message.
 
 ## Architecture & Refactor
@@ -26,7 +30,7 @@ Detailed documentation can be found in the [docs/architecture/](docs/architectur
 ## Installation
 
 ```bash
-npm install
+npm install email-origin-chain
 ```
 
 ### CLI Utilities
@@ -36,7 +40,7 @@ npx tsx bin/extract.ts tests/fixtures/complex-forward.eml
 ```
 
 ```typescript
-import { extractDeepestHybrid } from 'email-deepest-forward';
+import { extractDeepestHybrid } from 'email-origin-chain';
 
 // Process a full EML with hybrid strategy
 const result = await extractDeepestHybrid(rawEmailString);
@@ -406,7 +410,7 @@ All built-in detectors use the `Cleaner` utility to ensure consistent text norma
 - **Boundary Detection**: Uses the "Double Newline" rule found in professional parsers.
 
 ```typescript
-import { Cleaner } from 'email-deepest-forward/utils/cleaner';
+import { Cleaner } from 'email-origin-chain/utils/cleaner';
 
 const normalized = Cleaner.normalize(rawText);
 const bodyOnly = Cleaner.extractBody(lines, lastHeaderIndex);
