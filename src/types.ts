@@ -37,6 +37,7 @@ export interface ResultObject {
     date_raw: string | null;
     date_iso: string | null;
     text: string | null; // The cleaned body content of the deepest level
+    full_body?: string; // The full decoded text body before chain splitting
     attachments: Attachment[];
     history: HistoryEntry[];
     diagnostics: Diagnostics;

@@ -91,6 +91,7 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
             date_raw,
             date_iso,
             text: cleanText(text),
+            full_body: mimeResult.rawBody,
             attachments: [...attachments, ...inlineResult.attachments],
             diagnostics: {
                 ...inlineResult.diagnostics,
