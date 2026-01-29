@@ -2,6 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/email-origin-chain.svg)](https://www.npmjs.com/package/email-origin-chain)
 [![npm downloads](https://img.shields.io/npm/dm/email-origin-chain.svg)](https://www.npmjs.com/package/email-origin-chain)
+[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)](tests/)
+[![Fixtures](https://img.shields.io/badge/Fixtures-239%2F239%20Passed-blue)](docs/TEST_COVERAGE.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Uncover the full audit trail of your email threads.** Recursively deep-dives into forwards and replies to reconstruct the entire conversation history. Combines MIME traversal with multi-language text detection for a perfect message chain—giving you instant access to the original sender's details and the true source message.
