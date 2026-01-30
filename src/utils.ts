@@ -80,6 +80,33 @@ export function cleanText(text: string | null | undefined): string | null {
         .trim();
 }
 
+/**
+ * Basic HTML to Text converter to handle cases where text/plain is missing.
+ * Replaces common block elements with newlines and strips all other tags.
+ */
+export function convertHtmlToText(html: string | null | undefined): string | null {
+    if (typeof html !== 'string') return null;
+
+    let text = html
+        .replace(/<style([\s\S]*?)<\/style>/gi, '')   // Remove CSS
+        .replace(/<script([\s\S]*?)<\/script>/gi, '') // Remove JS
+        .replace(/<br\s*\/?>/gi, '\n')                 // <br> to \n
+        .replace(/<\/p>/gi, '\n\n')                    // </p> to double \n
+        .replace(/<\/div>/gi, '\n')                   // </div> to \n
+        .replace(/<[^>]+>/g, '')                      // Strip all tags
+        .replace(/&nbsp;/g, ' ')                      // Entities
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"');
+
+    // Decode entities like &#x... or &#...
+    text = text.replace(/&#([0-9]+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)));
+    text = text.replace(/&#x([0-9a-f]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+
+    return cleanText(text);
+}
+
 export function extractInlineAttachments(text: string | null | undefined): import('./types').Attachment[] {
     if (typeof text !== 'string') return [];
 

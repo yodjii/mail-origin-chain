@@ -1,5 +1,6 @@
 import { simpleParser, ParsedMail, Attachment as MailparserAttachment } from 'mailparser';
 import { Options, HistoryEntry } from './types';
+import { convertHtmlToText } from './utils';
 
 export interface MimeResult {
     rawBody: string; // The raw content of the deepest node found via MIME
@@ -15,7 +16,7 @@ export interface MimeResult {
     };
 }
 
-export async function processMime(raw: string, options: Options): Promise<MimeResult> {
+export async function processMime(raw: string | Buffer, options: Options): Promise<MimeResult> {
     let currentRaw = raw;
     let depth = 0;
     const maxDepth = options.maxDepth || 5;
@@ -24,8 +25,8 @@ export async function processMime(raw: string, options: Options): Promise<MimeRe
     const history: HistoryEntry[] = [];
 
     // Safety check
-    if (typeof raw !== 'string') {
-        throw new Error("MIME parser input must be a string");
+    if (typeof raw !== 'string' && !Buffer.isBuffer(raw)) {
+        throw new Error("MIME parser input must be a string or Buffer");
     }
 
     // Iterative approach to avoid call stack limits, though recursion is also fine for depth < 100
@@ -46,7 +47,7 @@ export async function processMime(raw: string, options: Options): Promise<MimeRe
                 subject: parsed.subject || null,
                 date_raw: parsed.date?.toString() || null,
                 date_iso: parsed.date ? parsed.date.toISOString() : null,
-                text: parsed.text || null, // Will be "exclusive" text once we know if there’s a forward inside
+                text: parsed.text || convertHtmlToText(parsed.html as string) || null,
                 depth,
                 flags: ['trust:high_mime'],
                 attachments: parsed.attachments.map(att => ({
@@ -63,7 +64,7 @@ export async function processMime(raw: string, options: Options): Promise<MimeRe
                 const last = rfcParts[rfcParts.length - 1];
 
                 if (last.content) {
-                    currentRaw = last.content.toString('utf8');
+                    currentRaw = last.content; // Pass Buffer directly to preserve encoding
                     depth++;
                     isRfc822 = true;
                     // Reset attachments for the new level
@@ -73,7 +74,7 @@ export async function processMime(raw: string, options: Options): Promise<MimeRe
             }
 
             return {
-                rawBody: parsed.text || currentRaw,
+                rawBody: parsed.text || convertHtmlToText(parsed.html as string) || (Buffer.isBuffer(currentRaw) ? currentRaw.toString('binary') : currentRaw),
                 depth,
                 lastAttachments: parsed.attachments,
                 isRfc822,
@@ -92,7 +93,7 @@ export async function processMime(raw: string, options: Options): Promise<MimeRe
     }
 
     return {
-        rawBody: currentRaw,
+        rawBody: typeof currentRaw === 'string' ? currentRaw : currentRaw.toString('binary'),
         depth,
         lastAttachments,
         isRfc822,

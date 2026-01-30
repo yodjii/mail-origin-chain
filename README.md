@@ -36,6 +36,24 @@ Detailed documentation can be found in the [docs/architecture/](docs/architectur
 npm install email-origin-chain
 ```
 
+### `extractDeepestHybrid(raw, options)`
+
+Analyzes an email to extract the most recent message in the chain and its full history.
+
+*   `raw`: **`string | Buffer`** - The full raw email source (recommended to pass as **Buffer** to preserve encoding).
+*   `options`: `Options` (optional) - Configuration for the extraction.
+
+#### Example
+
+```javascript
+const { extractDeepestHybrid } = require('email-origin-chain');
+const fs = require('fs');
+
+// Recommendation: Pass the raw Buffer directly from your source
+const rawEml = fs.readFileSync('email.eml');
+const result = await extractDeepestHybrid(rawEml);
+```
+
 ### CLI Utilities
 You can test any email file directly using the included extraction tool:
 ```bash

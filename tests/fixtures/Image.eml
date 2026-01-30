@@ -1,0 +1,432 @@
+Delivered-To: mezy.florian@gmail.com
+Received: by 2002:ac4:dcd5:0:b0:772:70d8:3987 with SMTP id v21csp653817pik;
+        Thu, 29 Jan 2026 07:25:06 -0800 (PST)
+X-Received: by 2002:a50:c8c9:0:b0:658:bd60:43de with SMTP id 4fb4d7f45d1cf-658cb20efdemr1685297a12.13.1769700306011;
+        Thu, 29 Jan 2026 07:25:06 -0800 (PST)
+ARC-Seal: i=2; a=rsa-sha256; t=1769700306; cv=pass;
+        d=google.com; s=arc-20240605;
+        b=gSgxHavqHpn45R7WLTyd5Oj8jJDqRvw7Dst33wvt7sb45tZCsUhVHpkpwmb27hIqOK
+         lehxBbEXG+78uEZQ1leYLggJEoI9j2Nr8x+2l7xvtt1YDcSXKmQ02TTmn4ZXCf8if/cI
+         vz7SL274Cg8EI91mkADXlVUxe6NnP6WdUq2SODQVIUXmITXkPIqHNGh9qr15dDU75dgh
+         Mnk6VQq3aPF29t3V+sELi6CjUYU5J2LOHLQhj3iQPQkQl84TZ0mdEn5WElk1wlXUKPmz
+         CHa4IS9rHf5KB6uWuz28EMP0Z9/VHrNZ1l76DVBTkNbOyUWNxAxtTF9NEKva6kZGaKug
+         9Eog==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :dkim-signature;
+        bh=YNTrUfi9f8LBwIws/qr4o4t2s67bxvjHum+85fv1ERE=;
+        fh=pZ12Wt2eVpRox7AIF8VDFw4sUo0bu5NeGgwyLUOsyTU=;
+        b=WYv6wSiNZFSl9HEqGyYggTSSfyYw/vxCWZXXVaxvEDz3jOaUAI+qb/yDWanKVFihTb
+         P8At+R8FOm6NFIBvnox4NO87FAmuSGKku2YCIjmy05+FQTfOCPrW31mb6UrUzJi+pmNN
+         pqq345IBODDqSFMDQNGFNroisO83JCsW6xiPjyqFTsRg8Y78v4LxQJ4X5JEqoddU61wV
+         Uwm7Jj1Z9wVJtP+T7zR9itbw+M/rU9maUL3azOOoe3qV2+xOzqMMD4ROXG+kYT9/+1/J
+         Z+I97WoO7eYJL6TV2zALQmo0dVxyz1q7nm0qqS1RZeP87be45Cm7i9o7yUQUr4frAxgD
+         UYEQ==;
+        dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=irWnnqw9;
+       arc=pass (i=1);
+       spf=pass (google.com: domain of florian.mezy@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=florian.mezy@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+Return-Path: <florian.mezy@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id 4fb4d7f45d1cf-658b7e1a5a3sor995260a12.7.2026.01.29.07.25.05
+        for <mezy.florian@gmail.com>
+        (Google Transport Security);
+        Thu, 29 Jan 2026 07:25:05 -0800 (PST)
+Received-SPF: pass (google.com: domain of florian.mezy@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20230601 header.b=irWnnqw9;
+       arc=pass (i=1);
+       spf=pass (google.com: domain of florian.mezy@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=florian.mezy@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;
+       dara=pass header.i=@gmail.com
+ARC-Seal: i=1; a=rsa-sha256; t=1769700305; cv=none;
+        d=google.com; s=arc-20240605;
+        b=JMIJ/3FLz7ih36+8nP6tJXXAOVBciw1kJy9KA/DT8sDXsllPubwFiorbcqw8CCIXQz
+         DHVTidCAn+qH4j8nDxt9PrJk1UKDlhT7VkOfuGjMXPLHHf6/7Q8IkFD1mm0QQJBdeSbp
+         eP1mg87mbnQ9tVs0PkTFAoPifkKJDuDfBRpSXG/1iEAcqoseJD6k13Qb1E/4GP0WkzxW
+         FeRKCSLTEeLRP9RcH49fxB9S8rkN28hpftP7gRFxCD/5uSu+ukrw5YNnl0wpN8wBWbha
+         FRmMDX2/EJc42hiCaeZKPd3gwgHYliWlW9jYjRUcVEfZUZpe7IhnQhv4p6CEbZZBRoW8
+         +F1A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :dkim-signature;
+        bh=YNTrUfi9f8LBwIws/qr4o4t2s67bxvjHum+85fv1ERE=;
+        fh=pZ12Wt2eVpRox7AIF8VDFw4sUo0bu5NeGgwyLUOsyTU=;
+        b=jiqVE/3d07ObM1BkQhLudlESj5DJH7D4eBTBwXc5XTZ0cHewakEoN3UfIrnrQN7RR1
+         hNCWYxBJ1wR5XcFCcLVr5s+UTZ5bR4gQgYFncV0zDn8GyvqlJXfuISsD0v06lSr8o8Po
+         CDLRMYVryEIY2uG6sIPzBhoUkmMb9zPMY/AoEXELTpbaWhexgbSpBN+h5AfPNa9pc9Su
+         EpXSXIChD18yaYdNCzy4BTzSmDuTr/P3NNkrpQfY0s5bOkkXdLeI71naDPfaCcN1eOfO
+         Hr87DU1v7fvD1bSQGxh2W1g1hthQtjL0nsM8mnJ+yKVrzMswS6u2pYx3Vm6q5ASJIsj8
+         tRig==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1769700305; x=1770305105; dara=google.com;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=YNTrUfi9f8LBwIws/qr4o4t2s67bxvjHum+85fv1ERE=;
+        b=irWnnqw9ck9/OpmbGgs1ShlXPdesyyC6o8XPtVYmGf6GnYNNpMzrUPKhzADWsDJVlz
+         E1iXy3gf+yj6wOTgQgZDdHWYsseiO2f9QbB9OPtj86Sz7UqX2UwEWvU12ogoiX7pJXoT
+         wwDpXcnk/2rQZOI5qfa8sNwgupxaqSss4xaEOtzxZduE2KBJ3XtDhKnSHbyVCZyifPnD
+         gnQsHNJ7KRhf9yaUhHoEYQPs89lBhdJ67+Kqu9G+U32utvcAhbYmNipNyAQENmg9BW/9
+         T/yvL8hzxN9TiVcxCMWXEqzq/zw2SZXOwlvYWDxp82ju3Qi92CHnfCIFIWKlfrVRiPbO
+         X1mw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1769700305; x=1770305105;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=YNTrUfi9f8LBwIws/qr4o4t2s67bxvjHum+85fv1ERE=;
+        b=dvp3reDgyP8GW/durgl9DMbr0YqS2ehxiV4RuKY2788SSdFdPU4C9r3el9Q5y7eo/P
+         xlNiFSMDSs/76FGtOyotq65hlG5Vo8Pln4/q93g9P6SS186Z+Mzmc7HuebFoAFb2hUqB
+         KfwooJZrPjp71tSEo9OBY08zTvBzxw2cm2AGF1L4iM9B5FyKQwv6LUmelHxupIzrWAcQ
+         KRdmJP0q6MC8U+809hHN0FYwHQiTwv4Fmp0PNJLmNu810Z8S/27ZGGfVjAsaO+g9qGhJ
+         pb0U0zk0az0D7xsuMapWB1nb9GeD2FCPYxrIB9w7F49R8PoCeZkTp/pyRgzJ+U9+XScr
+         7BxQ==
+X-Gm-Message-State: AOJu0Ywdhk4eGp8rE9nl66l4K/NRb36eX1TuzEA8/cDO5WCsm2jOVBAs
+	OozdosRDobFg7EOBFtrHZHUmTZ4AFP/vzvRi8hG2ERzXaimPmx3S+Lo7CHgMi6rIzO14doCjpLl
+	OmbGKFVGDvwkA/HagiW8APIDHy+TPiDvXsaCQ8fk=
+X-Gm-Gg: AZuq6aJY9GlZV7BOGSospt4T/uARn8+FaSs4eIL0manPpp200twYfmbgViS/jrUPdw/
+	tXU6H2nQ9mWfrJUQuZzw5eTmOn/GeEr7mwXSCJdnt9J4uIUjOSjTQ/Wudjpj90LlG77zAsJUGNh
+	85n2MhtvhHC8jzvtIK7CeSAgjIvR9ISIvfWQTiAb7UVug/9EZC4vYCKrSNy7H7JNo/7hTU7Jest
+	Wi63v1MUU318j9+4LIyKjyv8+jiJj/E2n6YfspoKdj60IPN6BixIeZ6ABFHOztdp2fehDQ7CBWk
+	bwMpS4avKoVbMnC5J2PdWgHMy7db
+X-Received: by 2002:a17:907:3f99:b0:b87:1ffc:bfc0 with SMTP id
+ a640c23a62f3a-b8ddf892c7amr228858166b.20.1769700304765; Thu, 29 Jan 2026
+ 07:25:04 -0800 (PST)
+MIME-Version: 1.0
+References: <reply-8223-879137414-2460218421-1560515218-932387547@helpscout.net>
+ <CAPq3X7r-s2WGkSnZDrBQi6jDvZMYC_BOv=xSCgnum9OxpAisdw@mail.gmail.com> <reply-8223-879137414-2463719929-1560691977-1529157731@helpscout.net>
+In-Reply-To: <reply-8223-879137414-2463719929-1560691977-1529157731@helpscout.net>
+From: "Flo M." <florian.mezy@gmail.com>
+Date: Thu, 29 Jan 2026 16:24:52 +0100
+X-Gm-Features: AZwV_QjMmgvdPTw-lTiNDVXJRs80zUfj_u3YyUTf8u2lR1-iVJP2Q5z0wpqL67I
+Message-ID: <CAPq3X7oBFBAp1EVR+_Kgi-+iYdDfbXu50mMCMGkvNmR7x6Pb4w@mail.gmail.com>
+Subject: Fwd: Image
+To: mezy.florian@gmail.com
+Content-Type: multipart/alternative; boundary="00000000000006456406498876df"
+
+--00000000000006456406498876df
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Forwarded Conversation
+Subject: Re: Image
+------------------------
+
+From: AMPforWP <team@ampforwp.com>
+Date: Fri, 14 Jun 2019 at 14:27
+To: florian mezy <florian.mezy@gmail.com>
+
+
+Hi,
+Thank for contacting us.
+
+Your concern is valid. Yes, you can rotate every time when the page is
+refreshed, for this,
+Follow the steps: You have to create group ads then select display location
+of ads (eg:- post to the page), select refresh type and set a timer for ads=
+.
+
+Here you can see the screenshots:
+1. https://monosnap.com/file/9lRoMDiGEVwuKntnKxKDZ9iL7VxtEl
+2. https://monosnap.com/file/6f4WMNarVn02Xwf2tUwPWpLT4pwV4M
+
+If you have any question feel free to ask me.
+
+Regards.
+Amer
+
+AMPforWP Customer Success Team
+(About Our Team <https://bit.ly/2q5UQW9>)
+
+How would you rate my reply?
+Great
+<https://secure.helpscout.net/satisfaction/262946627/record/2460218421/1/>
+   Okay
+<https://secure.helpscout.net/satisfaction/262946627/record/2460218421/2/>
+   Not Good
+<https://secure.helpscout.net/satisfaction/262946627/record/2460218421/3/>
+{#HS:879137414-70699#}
+On Fri, Jun 14, 2019 at 12:35 PM IST, florian mezy <florian.mezy@gmail.com>
+wrote:
+>
+> Hi,
+>
+> I have a custom ad below the header (image + link)
+>
+> And I need a way to make it rotate every time the page refresh or every x
+> seconds.
+>
+> Thanks
+>
+>
+>
+
+----------
+From: Flo M. <florian.mezy@gmail.com>
+Date: Sat, 15 Jun 2019 at 01:26
+To: Florian Mezy <florian.mezy@innov-mg.com>
+
+
+
+---------- Forwarded message ---------
+De : AMPforWP <team@ampforwp.com>
+Date: ven. 14 juin 2019 =C3=A0 20:27
+Subject: Re: Image
+To: florian mezy <florian.mezy@gmail.com>
+
+
+----------
+From: Flo M. <florian.mezy@gmail.com>
+Date: Sat, 15 Jun 2019 at 15:44
+To: AMPforWP <team@ampforwp.com>
+
+
+Ok I hadn't install this extension yet.
+
+Thank it's ok now
+
+
+
+
+----------
+From: AMPforWP <team@ampforwp.com>
+Date: Sun, 16 Jun 2019 at 15:33
+To: florian mezy <florian.mezy@gmail.com>
+
+
+Hi,
+Sorry in delay in response.
+
+Please install AMP for WP extension which already is available in your
+membership bundle and follow those steps that i have send in last mail.
+
+If you have any question feel free to ask me . I am here to help you.
+
+Regards.
+Amer
+
+AMPforWP Customer Success Team
+(About Our Team <https://bit.ly/2q5UQW9>)
+
+How would you rate my reply?
+Great
+<https://secure.helpscout.net/satisfaction/262946627/record/2463719929/1/>
+   Okay
+<https://secure.helpscout.net/satisfaction/262946627/record/2463719929/2/>
+   Not Good
+<https://secure.helpscout.net/satisfaction/262946627/record/2463719929/3/>
+{#HS:879137414-70699#}
+On Sat, Jun 15, 2019 at 7:14 PM IST, florian mezy <florian.mezy@gmail.com>
+wrote:
+>
+> Ok I hadn't install this extension yet.
+>
+> Thank it's ok now
+>
+>
+> On Fri, Jun 14, 2019 at 5:56 PM IST, AMPforWP <team@ampforwp.com> wrote:
+>>
+>> Hi,
+>> Thank for contacting us.
+>>
+>> Your concern is valid. Yes, you can rotate every time when the page is
+>> refreshed, for this,
+>> Follow the steps: You have to create group ads then select display
+>> location of ads (eg:- post to the page), select refresh type and set a
+>> timer for ads.
+>>
+>> Here you can see the screenshots:
+>> 1. https://monosnap.com/file/9lRoMDiGEVwuKntnKxKDZ9iL7VxtEl
+>> 2. https://monosnap.com/file/6f4WMNarVn02Xwf2tUwPWpLT4pwV4M
+>>
+>> If you have any question feel free to ask me.
+>>
+>> Regards.
+>> Amer
+>>
+>> AMPforWP Customer Success Team
+>> (About Our Team <https://bit.ly/2q5UQW9>)
+>>
+>
+
+--00000000000006456406498876df
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><br><div class=3D"gmail_quote gmail_quote_container"><div =
+dir=3D"ltr"><span style=3D"font-size:large;font-weight:bold">Forwarded Conv=
+ersation</span><br><span style=3D"font-weight:bold">Subject: Re: Image</spa=
+n><br>------------------------<br></div><br><div dir=3D"ltr" class=3D"gmail=
+_attr" style=3D"color:#888">From: <strong class=3D"gmail_sendername" dir=3D=
+"auto">AMPforWP</strong> <span dir=3D"auto">&lt;<a href=3D"mailto:team@ampf=
+orwp.com">team@ampforwp.com</a>&gt;</span><br>Date: Fri, 14 Jun 2019 at 14:=
+27<br>To: florian mezy &lt;<a href=3D"mailto:florian.mezy@gmail.com">floria=
+n.mezy@gmail.com</a>&gt;<br></div><br><br>
+
+   =20
+
+<div bgcolor=3D"#ffffff">
+<div id=3D"m_4012979389152685171hsReplyAbove">
+    <div style=3D"font-family:sans-serif">
+       =20
+                                    Hi,<br>Thank for contacting us.<br><br>=
+Your concern is valid. Yes, you can rotate every time when the page is refr=
+eshed, for this,<br>Follow the steps: You have to create group ads then sel=
+ect display location of ads (eg:- post to the page),  select refresh type a=
+nd set a timer for ads.<br><br>Here you can see the screenshots:<br>1. <a h=
+ref=3D"https://monosnap.com/file/9lRoMDiGEVwuKntnKxKDZ9iL7VxtEl" target=3D"=
+_blank">https://monosnap.com/file/9lRoMDiGEVwuKntnKxKDZ9iL7VxtEl</a><br>2. =
+<a href=3D"https://monosnap.com/file/6f4WMNarVn02Xwf2tUwPWpLT4pwV4M" target=
+=3D"_blank">https://monosnap.com/file/6f4WMNarVn02Xwf2tUwPWpLT4pwV4M</a><br=
+><br>If you have any question feel free to ask me.<br><br>Regards.<br>Amer<=
+br>
+                <br>AMPforWP Customer Success Team=C2=A0<br>(<a href=3D"htt=
+ps://bit.ly/2q5UQW9" target=3D"_blank">About Our Team</a>)<br><br>How would=
+ you rate my reply?<br><a href=3D"https://secure.helpscout.net/satisfaction=
+/262946627/record/2460218421/1/" style=3D"color:#50bc1c" target=3D"_blank">=
+Great</a> =C2=A0=C2=A0 <a href=3D"https://secure.helpscout.net/satisfaction=
+/262946627/record/2460218421/2/" style=3D"color:#555555" target=3D"_blank">=
+Okay</a> =C2=A0=C2=A0 <a href=3D"https://secure.helpscout.net/satisfaction/=
+262946627/record/2460218421/3/" style=3D"color:#f10000" target=3D"_blank">N=
+ot Good</a><br>
+                                    </div>
+            <span height=3D"0" style=3D"font-size:0px;height:0px;line-heigh=
+t:0px;color:#ffffff" id=3D"m_4012979389152685171hsContentRef">{#HS:87913741=
+4-70699#}</span>
+        <img src=3D"https://secure.helpscout.net/notification/convo/read/87=
+9137414/2460218421/" alt=3D"">    <br>
+</div>
+
+    <div class=3D"gmail_quote" style=3D"font-family:sans-serif">
+                                                        On Fri, Jun 14, 201=
+9 at 12:35 PM IST, florian mezy &lt;<a href=3D"mailto:florian.mezy@gmail.co=
+m" target=3D"_blank">florian.mezy@gmail.com</a>&gt; wrote:
+<blockquote type=3D"cite" class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;=
+border-left:1px solid #cccccc;padding-left:1ex">
+	<div style=3D"font-family:sans-serif">
+  Hi,
+<br>
+<br>I have a custom ad below the header (image + link)
+<br>
+<br>And I need a way to make it rotate every time the page refresh or every=
+ x seconds.
+<br>
+<br>Thanks<br><br>
+  <br>
+	</div>
+</blockquote>
+
+    </div>
+</div>
+
+
+<br><br><div dir=3D"ltr" class=3D"gmail_attr" style=3D"color:#888">--------=
+--<br>From: <strong class=3D"gmail_sendername" dir=3D"auto">Flo M.</strong>=
+ <span dir=3D"auto">&lt;<a href=3D"mailto:florian.mezy@gmail.com">florian.m=
+ezy@gmail.com</a>&gt;</span><br>Date: Sat, 15 Jun 2019 at 01:26<br>To: Flor=
+ian Mezy &lt;<a href=3D"mailto:florian.mezy@innov-mg.com">florian.mezy@inno=
+v-mg.com</a>&gt;<br></div><br><br><div dir=3D"auto"></div><br><div class=3D=
+"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">---------- Forwarded me=
+ssage ---------<br>De=C2=A0: <strong class=3D"gmail_sendername" dir=3D"auto=
+">AMPforWP</strong> <span dir=3D"auto">&lt;<a href=3D"mailto:team@ampforwp.=
+com" target=3D"_blank">team@ampforwp.com</a>&gt;</span><br>Date: ven. 14 ju=
+in 2019 =C3=A0 20:27<br>Subject: Re: Image<br>To: florian mezy &lt;<a href=
+=3D"mailto:florian.mezy@gmail.com" target=3D"_blank">florian.mezy@gmail.com=
+</a>&gt;<br></div></div>
+<br><br><div dir=3D"ltr" class=3D"gmail_attr" style=3D"color:#888">--------=
+--<br>From: <strong class=3D"gmail_sendername" dir=3D"auto">Flo M.</strong>=
+ <span dir=3D"auto">&lt;<a href=3D"mailto:florian.mezy@gmail.com">florian.m=
+ezy@gmail.com</a>&gt;</span><br>Date: Sat, 15 Jun 2019 at 15:44<br>To: AMPf=
+orWP &lt;<a href=3D"mailto:team@ampforwp.com">team@ampforwp.com</a>&gt;<br>=
+</div><br><br><div dir=3D"ltr"><div dir=3D"ltr">Ok I hadn&#39;t install thi=
+s extension yet.=C2=A0</div><div dir=3D"ltr"><br></div><div dir=3D"ltr">Tha=
+nk it&#39;s ok now<br><div><br></div><div><br></div></div></div>
+<br><br><div dir=3D"ltr" class=3D"gmail_attr" style=3D"color:#888">--------=
+--<br>From: <strong class=3D"gmail_sendername" dir=3D"auto">AMPforWP</stron=
+g> <span dir=3D"auto">&lt;<a href=3D"mailto:team@ampforwp.com">team@ampforw=
+p.com</a>&gt;</span><br>Date: Sun, 16 Jun 2019 at 15:33<br>To: florian mezy=
+ &lt;<a href=3D"mailto:florian.mezy@gmail.com">florian.mezy@gmail.com</a>&g=
+t;<br></div><br><br>
+
+   =20
+
+<div bgcolor=3D"#ffffff">
+<div id=3D"m_6413438958625330652hsReplyAbove">
+    <div style=3D"font-family:sans-serif">
+       =20
+                                    Hi,<br>Sorry in delay in response.<br><=
+br>Please install AMP for WP extension which already is available in your m=
+embership bundle and follow those steps  that i have send in last mail.<br>=
+<br>If you have any question feel free to ask me . I am here to help you.<b=
+r><br>Regards.<br>Amer<br>
+                <br>AMPforWP Customer Success Team=C2=A0<br>(<a href=3D"htt=
+ps://bit.ly/2q5UQW9" target=3D"_blank">About Our Team</a>)<br><br>How would=
+ you rate my reply?<br><a href=3D"https://secure.helpscout.net/satisfaction=
+/262946627/record/2463719929/1/" style=3D"color:#50bc1c" target=3D"_blank">=
+Great</a> =C2=A0=C2=A0 <a href=3D"https://secure.helpscout.net/satisfaction=
+/262946627/record/2463719929/2/" style=3D"color:#555555" target=3D"_blank">=
+Okay</a> =C2=A0=C2=A0 <a href=3D"https://secure.helpscout.net/satisfaction/=
+262946627/record/2463719929/3/" style=3D"color:#f10000" target=3D"_blank">N=
+ot Good</a><br>
+                                    </div>
+            <span height=3D"0" style=3D"font-size:0px;height:0px;line-heigh=
+t:0px;color:#ffffff" id=3D"m_6413438958625330652hsContentRef">{#HS:87913741=
+4-70699#}</span>
+        <img src=3D"https://secure.helpscout.net/notification/convo/read/87=
+9137414/2463719929/" alt=3D"">    <br>
+</div>
+
+    <div class=3D"gmail_quote" style=3D"font-family:sans-serif">
+                                                                           =
+                                                                           =
+                                                      <div class=3D"gmail_q=
+uote" style=3D"font-family:sans-serif">
+	On Sat, Jun 15, 2019 at 7:14 PM IST, florian mezy &lt;<a href=3D"mailto:fl=
+orian.mezy@gmail.com" target=3D"_blank">florian.mezy@gmail.com</a>&gt; wrot=
+e:
+<blockquote type=3D"cite" class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;=
+border-left:1px solid #cccccc;padding-left:1ex">
+	<div style=3D"font-family:sans-serif">
+  Ok I hadn&#39;t install this extension yet.<br>
+<br>
+Thank it&#39;s ok now<br><br>
+  <br>
+  <div class=3D"gmail_quote" style=3D"font-family:sans-serif">
+	On Fri, Jun 14, 2019 at 5:56 PM IST, AMPforWP &lt;<a href=3D"mailto:team@a=
+mpforwp.com" target=3D"_blank">team@ampforwp.com</a>&gt; wrote:
+<blockquote type=3D"cite" class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;=
+border-left:1px solid #cccccc;padding-left:1ex">
+	<div style=3D"font-family:sans-serif">
+  Hi,<br>Thank for contacting us.<br><br>Your concern is valid. Yes, you ca=
+n rotate every time when the page is refreshed, for this,<br>Follow the ste=
+ps: You have to create group ads then select display location of ads (eg:- =
+post to the page),  select refresh type and set a timer for ads.<br><br>Her=
+e you can see the screenshots:<br>1. <a href=3D"https://monosnap.com/file/9=
+lRoMDiGEVwuKntnKxKDZ9iL7VxtEl" target=3D"_blank">https://monosnap.com/file/=
+9lRoMDiGEVwuKntnKxKDZ9iL7VxtEl</a><br>2. <a href=3D"https://monosnap.com/fi=
+le/6f4WMNarVn02Xwf2tUwPWpLT4pwV4M" target=3D"_blank">https://monosnap.com/f=
+ile/6f4WMNarVn02Xwf2tUwPWpLT4pwV4M</a><br><br>If you have any question feel=
+ free to ask me.<br><br>Regards.<br>Amer<br>
+  <br>AMPforWP Customer Success Team=C2=A0<br>(<a href=3D"https://bit.ly/2q=
+5UQW9" target=3D"_blank">About Our Team</a>)
+  <br>
+  </div>
+</blockquote>
+
+</div>
+	</div>
+</blockquote>
+
+</div>
+    </div>
+</div>
+
+
+<br><br></div></div>
+
+--00000000000006456406498876df--

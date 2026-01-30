@@ -1,18 +1,15 @@
+import { ResultObject, Options, EmailAddress } from './types';
 import { processMime } from './mime-layer';
 import { processInline } from './inline-layer';
-import { Options, ResultObject, Attachment } from './types';
-import { normalizeDateToISO, cleanText, normalizeFrom } from './utils';
-import { calculateConfidence } from './scoring';
+import { cleanText, normalizeFrom } from './utils';
 
 /**
  * Main entry point: Extract the deepest forwarded email using hybrid strategy
  */
-export async function extractDeepestHybrid(raw: string, options?: Options): Promise<ResultObject> {
-    // Validation
-    if (typeof raw !== 'string') {
-        throw new Error('Input must be a string');
-    }
-
+export async function extractDeepestHybrid(
+    raw: string | Buffer,
+    options?: Options
+): Promise<ResultObject> {
     const opts = {
         maxDepth: options?.maxDepth ?? 15,
         timeoutMs: options?.timeoutMs ?? 10000,
@@ -20,122 +17,99 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
         customDetectors: options?.customDetectors ?? []
     };
 
-    const warnings: string[] = [];
-
-    // If skipMimeLayer is true, parse only inline forwards (text-only mode)
-    if (opts.skipMimeLayer) {
-        return await processInline(raw, 0, [], opts.customDetectors);
-    }
-
     try {
         // Step 1: MIME Layer
-        let timer: NodeJS.Timeout | undefined;
-        const mimeResult = await Promise.race([
-            processMime(raw, opts),
-            new Promise<never>((_, reject) => {
-                timer = setTimeout(() => reject(new Error('MIME parsing timeout')), opts.timeoutMs);
-            })
-        ]).finally(() => {
+        let mimeResult;
+        if (opts.skipMimeLayer) {
+            // Simulated mime result for text-only inputs
+            const rawBody = typeof raw === 'string' ? raw : raw.toString('binary');
+            mimeResult = {
+                rawBody,
+                depth: 0,
+                lastAttachments: [],
+                isRfc822: false,
+                history: [],
+                metadata: {}
+            };
+        } else {
+            let timer: NodeJS.Timeout | undefined;
+            mimeResult = await Promise.race([
+                processMime(raw, opts),
+                new Promise<any>((_, reject) => {
+                    timer = setTimeout(() => reject(new Error('MIME parsing timeout')), opts.timeoutMs);
+                    if (timer && typeof timer.unref === 'function') timer.unref();
+                })
+            ]);
             if (timer) clearTimeout(timer);
-        });
+        }
 
         // Step 2: Inline Layer
-        const inlineResult = await processInline(mimeResult.rawBody, mimeResult.depth, mimeResult.history, opts.customDetectors);
+        const inlineResult = await processInline(
+            mimeResult.rawBody,
+            mimeResult.depth,
+            mimeResult.history,
+            opts.customDetectors
+        );
 
-        // Step 3: Align results
-        let from = normalizeFrom(inlineResult.from);
-        let to = normalizeFrom(inlineResult.to);
-        let subject = inlineResult.subject;
-        let date_raw = inlineResult.date_raw;
-        let date_iso = inlineResult.date_iso;
-        let text = inlineResult.text;
+        // history[0] is the DEEPEST level (original message)
+        const deepestEntry = inlineResult.history[0];
 
-        if (inlineResult.diagnostics.method === 'fallback' && mimeResult.metadata) {
-            const m = mimeResult.metadata;
-            if ((!from || !from.address) && m.from?.value?.[0]) {
-                from = normalizeFrom({ name: m.from.value[0].name, address: m.from.value[0].address });
-            }
-            if ((!to || !to.address) && m.to?.value?.[0]) {
-                to = normalizeFrom({ name: m.to.value[0].name, address: m.to.value[0].address });
-            }
-            if (!subject && m.subject) subject = m.subject;
-            if (!date_iso && m.date) date_iso = m.date.toISOString();
-            if (!date_raw && m.date) date_raw = m.date.toString();
-            if (!text) text = mimeResult.rawBody;
-        }
-
-        // Align the root entry of history
-        if (inlineResult.history.length > 0) {
-            const rootInHistory = inlineResult.history[inlineResult.history.length - 1];
-            if (!rootInHistory.from && mimeResult.metadata) {
-                const m = mimeResult.metadata;
-                if (m.from?.value?.[0]) {
-                    rootInHistory.from = normalizeFrom({ name: m.from.value[0].name, address: m.from.value[0].address });
-                }
-                if (m.to?.value?.[0]) {
-                    rootInHistory.to = normalizeFrom({ name: m.to.value[0].name, address: m.to.value[0].address });
-                }
-                if (m.subject) rootInHistory.subject = m.subject;
+        // Metadata extraction from MIME for fallback
+        let mimeFrom: EmailAddress | null = null;
+        if (mimeResult.metadata?.from) {
+            const mFrom = mimeResult.metadata.from as any;
+            if (mFrom.value?.[0]) {
+                mimeFrom = { name: mFrom.value[0].name, address: mFrom.value[0].address };
+            } else if (mFrom.text) {
+                mimeFrom = { address: mFrom.text };
             }
         }
 
-        // Step 4: Final enrichment
-        const attachments: Attachment[] = mimeResult.lastAttachments.map(att => ({
+        const from = normalizeFrom(deepestEntry?.from || mimeFrom);
+        const subject = deepestEntry?.subject || mimeResult.metadata?.subject || null;
+        const date_raw = deepestEntry?.date_raw || mimeResult.metadata?.date?.toString() || null;
+        const date_iso = deepestEntry?.date_iso || mimeResult.metadata?.date?.toISOString() || null;
+
+        const attachments = (mimeResult.lastAttachments || []).map((att: any) => ({
             filename: att.filename,
             contentType: att.contentType || 'application/octet-stream',
             size: att.size || 0
         }));
 
-        date_iso = date_iso || normalizeDateToISO(date_raw);
+        const warnings = [
+            ...(inlineResult.history.length <= 1 && !mimeResult.isRfc822 ? ['No forwarded content detected'] : [])
+        ];
 
-        // Destructure to exclude 'from' since we have our own normalized version
-        const { from: _unusedFrom, ...restInlineResult } = inlineResult;
-
-        // Calculate confidence score
-        const confidence = calculateConfidence(mimeResult.rawBody, mimeResult.depth + inlineResult.diagnostics.depth);
-
-        const result: ResultObject = {
-            ...restInlineResult,
-            // Use our normalized/enriched values
+        return {
             from,
-            to,
+            to: deepestEntry?.to || null,
             subject,
             date_raw,
             date_iso,
-            text: cleanText(text),
+            text: cleanText(deepestEntry?.text),
             full_body: cleanText(mimeResult.rawBody) || '',
-
-            // Confidence
-            confidence_score: confidence.score,
-            confidence_description: confidence.description,
-            confidence_ratio: confidence.ratio,
-            confidence_email_count: confidence.email_count,
-            confidence_sender_count: confidence.sender_count,
-            confidence_quote_depth: confidence.quote_depth,
-            confidence_signals: confidence.signals,
-            confidence_reasons: confidence.reasons,
-
+            confidence_score: 0,
             attachments: [...attachments, ...inlineResult.attachments],
+            history: inlineResult.history,
             diagnostics: {
                 ...inlineResult.diagnostics,
                 depth: mimeResult.depth + inlineResult.diagnostics.depth,
                 method: (inlineResult.diagnostics.method === 'fallback' && mimeResult.isRfc822) ? 'rfc822' : inlineResult.diagnostics.method,
-                parsedOk: !!(from && subject) || !!(from && inlineResult.diagnostics.method !== 'fallback'),
+                parsedOk: !!(from && (subject || inlineResult.history.length > 1)),
                 warnings: [...warnings, ...inlineResult.diagnostics.warnings]
             }
         };
 
-        return result;
-
     } catch (error) {
+        const rawString = typeof raw === 'string' ? raw : raw.toString('binary');
         return {
             from: null,
             to: null,
             subject: null,
             date_raw: null,
             date_iso: null,
-            text: cleanText(raw),
-            full_body: cleanText(raw) || '',
+            text: cleanText(rawString),
+            full_body: cleanText(rawString) || '',
             attachments: [],
             history: [],
             diagnostics: {
@@ -147,5 +121,3 @@ export async function extractDeepestHybrid(raw: string, options?: Options): Prom
         };
     }
 }
-
-export * from './types';
